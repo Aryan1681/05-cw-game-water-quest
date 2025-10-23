@@ -1,23 +1,92 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Water Quest</title>
-  <link href="style.css" rel="stylesheet" type="text/css" />
+  <link href="style.css" rel="stylesheet" />
 </head>
-<body>
-  <div class="container">
-    <h1>Water Quest</h1>
-    <p class="game-instructions">Collect 20 items to complete the game!</p>
-    <div class="stats">
-      <p>Cans Collected: <span id="current-cans">0</span></p>
-      <p>Time Left: <span id="timer">30</span>s</p>
+<body class="theme-sky">
+  <!-- Background art layer (switches with theme) -->
+  <div class="world-bg" aria-hidden="true"></div>
+
+  <header class="brandbar">
+    <div class="lockup">
+      <!-- Inline “jerry can” so the logo never breaks -->
+      <svg class="logo" viewBox="0 0 64 72" aria-hidden="true">
+        <rect x="10" y="12" rx="6" ry="6" width="44" height="50" fill="#FFC907" stroke="rgba(0,0,0,.12)" stroke-width="3"/>
+        <rect x="36" y="6"  rx="3" ry="3" width="16" height="10" fill="#FFC907" stroke="rgba(0,0,0,.12)" stroke-width="3"/>
+      </svg>
+      <span class="brand">charity: water</span>
+      <span class="divider">•</span>
+      <span class="brand game">Water Quest</span>
     </div>
-    <div id="achievements" class="achievement"></div>
-    <div class="game-grid"></div>
-    <button id="start-game">Start Game</button>
-  </div>
+
+    <nav class="actions">
+      <label class="toggle">
+        <input id="reducedMotion" type="checkbox" />
+        <span>Reduced motion</span>
+      </label>
+      <a class="link" href="https://www.charitywater.org/" target="_blank" rel="noopener">Learn</a>
+    </nav>
+  </header>
+
+  <main class="shell">
+    <p class="subtitle">Tap clean jerry cans to score. Avoid dirty cans. Reach the goal before time runs out.</p>
+
+    <section class="options">
+      <label class="opt">
+        Theme
+        <select id="themeSelect">
+          <option value="theme-sky">Sky</option>
+          <option value="theme-desert">Desert</option>
+          <option value="theme-ocean">Ocean</option>
+          <option value="theme-neon">Neon Night</option>
+        </select>
+      </label>
+
+      <label class="opt">
+        Difficulty
+        <select id="difficultySelect">
+          <option value="chill">Chill</option>
+          <option value="normal" selected>Normal</option>
+          <option value="turbo">Turbo</option>
+        </select>
+      </label>
+    </section>
+
+    <section class="chips">
+      <div class="chip">Score <strong id="score">0</strong></div>
+      <div class="chip">Best <strong id="best">0</strong></div>
+      <div class="chip">Goal <strong id="goal">20</strong></div>
+      <div class="chip">Lives <strong id="lives">3</strong></div>
+      <div class="chip">Streak <strong id="streak">0</strong></div>
+      <div class="chip time">Time <strong id="timer">60</strong>s</div>
+    </section>
+
+    <div class="timebar" aria-label="time left">
+      <div id="timeProgress" class="timeprogress" style="--p:1"></div>
+    </div>
+
+    <div id="milestone" class="banner" role="status" aria-live="polite"></div>
+    <div id="achievements" class="achievement" aria-live="polite"></div>
+
+    <section class="stage">
+      <div id="grid" class="game-grid" aria-label="game board"></div>
+    </section>
+
+    <div class="controls">
+      <button id="start-game" class="btn primary">Start</button>
+      <button id="reset-game" class="btn ghost">Reset</button>
+    </div>
+
+    <canvas id="confetti" class="confetti-layer" aria-hidden="true"></canvas>
+  </main>
+
+  <footer class="footnote">
+    <small>Student prototype aligned to charity: water brand tone and colors. Themes are cosmetic.</small>
+  </footer>
+
   <script src="script.js"></script>
 </body>
 </html>

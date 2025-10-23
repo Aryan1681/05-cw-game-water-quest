@@ -1,143 +1,241 @@
-/* Charity: water Brand Colors & Fonts
+:root{
+  --cw-yellow:#FFC907;
+  --cw-blue:#2E9DF7;
+  --ink:#0f172a;
+  --muted:#667085;
+  --panel:#ffffff;
+  --edge:#e6e8eb;
 
-Primary Colors:
-- Yellow:     #FFC907
-- Blue:       #2E9DF7
-
-Secondary Colors:
-- Light Blue: #8BD1CB
-- Green:      #4FCB53
-- Orange:     #FF902A
-- Red:        #F5402C
-- Dark Green: #159A48
-- Pink:       #F16061
-
-Fonts:
-- Proxima Nova
-- Avenir
-
-*/
-
-* {
-  box-sizing: border-box;
+  /* default tokens (overridden per theme) */
+  --bg-a:#ecf3ff;
+  --bg-b:#f8fbff;
+  --tile-a:#eef7ff;
+  --tile-b:#e2f1ff;
+  --accent:#2E9DF7;
+  --accent-2:#60a5fa;
+  --danger:#454545;
 }
 
-body {
-  font-family: Arial, sans-serif;
-  margin: 0;
-  padding: 30px;
-  background-color: #f0f0f0;
-  color: #333;
-}
-
-.container {
-  max-width: 750px;
-  margin: 50px auto;
-  background-color: #fff;
-  padding: 40px;
-  border-radius: 10px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-}
-
-h1 {
-  text-align: center;
-  font-size: 30px;
-  font-weight: bold;
-  margin-bottom: 20px;
-  color: #333;
-}
-
-h1 img {
-  height: 50px;
-  margin-right: 15px;
-  display: block;
-}
-
-.game-instructions {
-  font-size: 18px;
-  margin-bottom: 30px;
-  text-align: center;
-}
-
-.stats {
-  display: flex;
-  justify-content: space-around;
-  margin-bottom: 30px;
-  background-color: #f5f5f5;
-  padding: 15px 0;
-  border-radius: 8px;
-}
-
-.stats p {
-  margin: 0;
-  font-size: 18px;
-  font-weight: bold;
-  color: #333;
-}
-
-.game-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 15px;
-  margin: 0 auto;
-  max-width: 500px;
-}
-
-.grid-cell {
-  background-color: #e8e8e8;
-  border-radius: 8px;
-  aspect-ratio: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: background-color 0.3s;
-  position: relative;
-  overflow: hidden;
-}
-
-.water-can-wrapper {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 70px;
-  height: 70px;
-  /* Ensure the wrapper is properly centered */
-}
-
-.water-can {
-  width: 100%;
-  height: 100%;
-  background-image: url('img/water-can.png');
+/* ===== World background layer ===== */
+.world-bg{
+  position: fixed;
+  inset: 0;
+  z-index: -1;
   background-size: cover;
-  background-repeat: no-repeat;
   background-position: center;
-  cursor: pointer;
-  border-radius: 50%;
-  animation: popUp 0.5s cubic-bezier(0.17, 0.67, 0.34, 2);
-  transform-origin: center; /* Ensure scaling happens from the center */
+  background-repeat: no-repeat;
+  opacity: .45;
+  filter: saturate(1.05);
+}
+body.theme-neon .world-bg{ opacity:.35 }
+
+/* ===== THEMES with background art ===== */
+body.theme-sky{
+  --bg-a:#ecf3ff; --bg-b:#f8fbff;
+  --tile-a:#eef7ff; --tile-b:#e2f1ff;
+  --accent:#2E9DF7; --accent-2:#7dd3fc;
+}
+body.theme-sky .world-bg{
+  background-image:url("data:image/svg+xml;utf8,\
+<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1600 900'>\
+<defs><linearGradient id='g' x1='0' y1='0' x2='0' y2='1'>\
+<stop offset='0%' stop-color='%23cfe9ff'/><stop offset='100%' stop-color='%23f6fbff'/>\
+</linearGradient></defs><rect width='1600' height='900' fill='url(%23g)'/>\
+<g fill='%23ffffff' opacity='0.9'>\
+<ellipse cx='250' cy='180' rx='140' ry='60'/>\
+<ellipse cx='330' cy='170' rx='110' ry='50'/>\
+<ellipse cx='1100' cy='220' rx='150' ry='65'/>\
+<ellipse cx='1180' cy='210' rx='110' ry='50'/>\
+</g><g fill='%23ffffff' opacity='0.7'>\
+<ellipse cx='700' cy='120' rx='120' ry='50'/>\
+<ellipse cx='780' cy='115' rx='90' ry='40'/>\
+<ellipse cx='500' cy='310' rx='130' ry='56'/>\
+</g></svg>");
 }
 
-@keyframes popUp {
-  0% {
-    transform: scale(0.5); /* Start scaling from the center */
-  }
-  100% {
-    transform: scale(1); /* End scaling at full size */
-  }
+body.theme-desert{
+  --bg-a:#fff4d6; --bg-b:#fffaf0;
+  --tile-a:#ffe9b3; --tile-b:#ffe2a3;
+  --accent:#f59e0b; --accent-2:#fbbf24;
+}
+body.theme-desert .world-bg{
+  background-image:url("data:image/svg+xml;utf8,\
+<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1600 900'>\
+<linearGradient id='s' x1='0' y1='0' x2='0' y2='1'>\
+<stop offset='0%' stop-color='%23fff4d6'/><stop offset='100%' stop-color='%23fffaf0'/>\
+</linearGradient><rect width='1600' height='900' fill='url(%23s)'/>\
+<path d='M0 640 C300 540, 500 720, 800 660 C1100 600, 1300 760, 1600 680 L1600 900 L0 900 Z' fill='%23f7d38a'/>\
+<path d='M0 720 C260 630, 520 760, 820 720 C1120 680, 1360 800, 1600 760 L1600 900 L0 900 Z' fill='%23f4c26a' opacity='0.9'/>\
+</svg>");
 }
 
-
-button {
-  background-color: #4CAF50;
-  color: white;
-  border: none;
-  padding: 12px 24px;
-  font-size: 16px;
-  border-radius: 8px;
-  cursor: pointer;
-  display: block;
-  margin: 30px auto 0;
-  transition: background-color 0.2s;
+body.theme-ocean{
+  --bg-a:#d7f9ff; --bg-b:#f1fdff;
+  --tile-a:#c8f0f9; --tile-b:#b8e8f2;
+  --accent:#06b6d4; --accent-2:#22d3ee;
 }
+body.theme-ocean .world-bg{
+  background-image:url("data:image/svg+xml;utf8,\
+<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1600 900'>\
+<linearGradient id='o' x1='0' y1='0' x2='0' y2='1'>\
+<stop offset='0%' stop-color='%23bff3ff'/><stop offset='100%' stop-color='%23e9feff'/>\
+</linearGradient><rect width='1600' height='900' fill='url(%23o)'/>\
+<path d='M0 640 Q150 610 300 640 T600 640 T900 640 T1200 640 T1600 640 L1600 900 L0 900 Z' fill='%2306b6d4' opacity='.25'/>\
+<path d='M0 700 Q180 670 360 700 T720 700 T1080 700 T1440 700 T1600 700 L1600 900 L0 900 Z' fill='%2306b6d4' opacity='.35'/>\
+</svg>");
+}
+
+body.theme-neon{
+  --bg-a:#0b1020; --bg-b:#0f1429;
+  --tile-a:#121a35; --tile-b:#0f1830;
+  --accent:#7c3aed; --accent-2:#06b6d4;
+  --ink:#e5e7eb; --muted:#9aa3b2; --panel:#0f1426; --edge:#1f2740;
+}
+body.theme-neon .world-bg{
+  background-image:url("data:image/svg+xml;utf8,\
+<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1600 900'>\
+<rect width='1600' height='900' fill='%230b1020'/>\
+<g stroke='%237c3aed' stroke-opacity='.5'>\
+<path d='M0 760 L1600 760'/><path d='M0 680 L1600 680'/>\
+<path d='M0 840 L1600 840'/><path d='M200 900 L800 400 L1400 900' fill='none'/>\
+</g></svg>");
+}
+
+/* ===== Base layout and components ===== */
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;
+  font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial;
+  color:var(--ink);
+  background:
+    radial-gradient(900px 500px at 20% -10%, var(--bg-a) 0%, transparent 70%),
+    radial-gradient(900px 500px at 120% 10%, var(--bg-a) 0%, transparent 70%),
+    linear-gradient(180deg,var(--bg-a),var(--bg-b));
+}
+
+/* Header */
+.brandbar{
+  position:sticky; top:0; z-index:10;
+  display:flex; align-items:center; justify-content:space-between;
+  padding:10px 16px; background:color-mix(in oklab, var(--panel) 88%, transparent);
+  backdrop-filter:saturate(1.05) blur(8px);
+  border-bottom:1px solid var(--edge);
+}
+.lockup{display:flex; align-items:center; gap:10px}
+.logo{width:28px; height:auto}
+.brand{font-weight:800}
+.brand.game{font-weight:800; letter-spacing:.2px}
+.divider{opacity:.35}
+.actions{display:flex; gap:14px; align-items:center}
+.toggle{display:flex; align-items:center; gap:6px; font-size:14px}
+.toggle input{accent-color:#111}
+.link{color:var(--accent); text-decoration:none; font-weight:700}
+
+/* Layout shell */
+.shell{max-width:980px; margin:24px auto; padding:0 16px}
+.subtitle{margin:6px 0 14px; text-align:center; color:var(--muted)}
+
+/* Options */
+.options{display:flex; gap:10px; justify-content:center; margin:6px 0 14px; flex-wrap:wrap}
+.opt{display:flex; gap:6px; align-items:center; background:var(--panel); border:1px solid var(--edge); padding:8px 10px; border-radius:10px}
+select{border:1px solid var(--edge); border-radius:8px; padding:6px 8px; background:var(--panel); color:var(--ink)}
+
+/* HUD chips */
+.chips{
+  display:grid; grid-template-columns:repeat(6,1fr); gap:12px; margin:0 0 10px;
+}
+.chip{
+  background:var(--panel); border:1px solid var(--edge); border-radius:12px; padding:10px 12px;
+  box-shadow:0 8px 24px rgba(16,24,40,.06);
+  text-align:center; font-weight:600;
+}
+.chip strong{font-weight:800}
+.chip.time{background:linear-gradient(180deg,var(--panel), color-mix(in oklab,var(--accent) 8%, var(--panel)))}
+
+/* Time bar */
+.timebar{height:10px; background:var(--panel); border:1px solid var(--edge); border-radius:999px; overflow:hidden; margin:6px 0 14px}
+.timeprogress{
+  height:100%; width:calc(var(--p)*100%);
+  background:linear-gradient(90deg,var(--accent), var(--accent-2) 60%);
+  transition:width .25s linear;
+}
+
+/* Messages */
+.banner{min-height:26px; margin:4px 0; text-align:center; color:var(--ink); font-weight:800}
+.achievement{min-height:22px; margin:0 0 10px; text-align:center; color:var(--ink)}
+
+/* Stage + grid */
+.stage{
+  background:var(--panel); border:1px solid var(--edge); border-radius:16px; padding:18px;
+  box-shadow:0 10px 28px rgba(16,24,40,.08);
+}
+.game-grid{
+  display:grid; grid-template-columns:repeat(3,1fr); gap:14px; max-width:560px; margin:0 auto;
+}
+.grid-cell{
+  aspect-ratio:1; border-radius:14px; border:1px solid color-mix(in srgb, var(--accent) 20%, #fff 80%);
+  background:linear-gradient(180deg,var(--tile-a),var(--tile-b));
+  position:relative; overflow:hidden;
+  transition:transform .12s ease, box-shadow .12s ease;
+}
+.grid-cell:hover{transform:translateY(-1px); box-shadow:0 10px 20px color-mix(in srgb, var(--accent) 15%, #000 0%)}
+
+/* Tokens */
+.water-can-wrapper{position:absolute; inset:0; display:grid; place-items:center}
+.water-can{
+  width:74px; height:74px; position:relative; border-radius:12px; transform-origin:center;
+  animation:pop .18s ease-out both;
+  filter:drop-shadow(0 8px 14px rgba(17,24,39,.12));
+}
+@keyframes pop{from{transform:scale(.7); opacity:.8} to{transform:scale(1); opacity:1}}
+
+.water-can.clean{background:var(--cw-yellow); border:2px solid rgba(0,0,0,.08)}
+.water-can.clean::before{
+  content:""; position:absolute; right:8px; top:-8px; width:18px; height:10px; border-radius:2px 2px 0 0;
+  background:var(--cw-yellow); border:2px solid rgba(0,0,0,.08)
+}
+.water-can.pollutant{background:var(--danger); border-radius:50%}
+.water-can.pollutant::after{
+  content:"✖"; position:absolute; inset:0; color:#fff; display:grid; place-items:center; font-weight:800; font-size:36px;
+  transform:translateY(-1px);
+}
+
+/* Click effects */
+.ripple{
+  position:absolute; width:10px; height:10px; border-radius:50%; background:rgba(255,255,255,.85);
+  transform:translate(-50%,-50%) scale(1); animation:ripple .5s ease-out forwards; pointer-events:none;
+}
+@keyframes ripple{to{opacity:0; transform:translate(-50%,-50%) scale(14)}}
+.shake{animation:shake .18s linear 1}
+@keyframes shake{0%{transform:translateX(-4px)}25%{transform:translateX(4px)}50%{transform:translateX(-4px)}75%{transform:translateX(4px)}100%{transform:translateX(0)}}
+
+/* Controls */
+.controls{display:flex; gap:10px; justify-content:center; margin:16px 0 8px}
+.btn{
+  height:42px; padding:0 16px; border-radius:12px; font-weight:800; cursor:pointer;
+  border:1px solid #111; background:#111; color:#fff; letter-spacing:.2px;
+}
+.btn.ghost{background:var(--panel); color:#111; border-color:var(--edge)}
+.btn:disabled{opacity:.6; cursor:not-allowed}
+
+/* Confetti */
+.confetti-layer{position:fixed; inset:0; pointer-events:none}
+
+/* Footer */
+.footnote{text-align:center; color:var(--muted); padding:10px 0 18px}
+
+/* Responsive */
+@media (max-width: 980px){
+  .chips{grid-template-columns:repeat(3,1fr)}
+}
+@media (max-width: 560px){
+  .chips{grid-template-columns:repeat(2,1fr)}
+  .options{gap:8px}
+  .link{display:none}
+}
+
+/* Reduced motion */
+html.rm .grid-cell:hover{transform:none; box-shadow:none}
+html.rm .water-can{animation:none}
+html.rm .ripple{display:none}
