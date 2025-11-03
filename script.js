@@ -1,13 +1,9 @@
 // ===== Config =====
-const GOAL = 20;                     // win threshold
-const ROUND_TIME = 60;               // seconds
+const GOAL = 20;
+const ROUND_TIME = 60;
 const START_LIVES = 3;
 
-const DIFFICULTY = {
-  chill: 1050,
-  normal: 850,
-  turbo: 650
-};
+const DIFFICULTY = { chill: 1050, normal: 850, turbo: 650 };
 const POLLUTANT_CHANCE = 0.25;
 const MISS_PENALTY = 1;
 
@@ -22,9 +18,17 @@ const LOSE_MESSAGES = [
   "Missed the goal, but progress matters."
 ];
 
+const MILESTONES = [
+  { score: 5,  msgs: ["Milestone 5: you’re warmed up.", "Nice rhythm at 5."] },
+  { score: 10, msgs: ["Halfway there!", "Milestone 10: keep the flow going."] },
+  { score: 15, msgs: ["15 reached. Almost there.", "Strong streak into 15."] },
+  { score: GOAL, msgs: ["Goal reached! Campus perk preview unlocked.", "Goal met. Clean water momentum."] }
+];
+
 // ===== State =====
 let score=0, best=0, timeLeft=ROUND_TIME, lives=START_LIVES, streak=0, running=false;
 let tickId=null, spawnId=null, spawnMs=DIFFICULTY.normal;
+let firedMilestones = new Set();
 
 // ===== DOM =====
 const els = {
@@ -43,7 +47,17 @@ const els = {
   confetti: document.getElementById("confetti"),
   reducedMotion: document.getElementById("reducedMotion"),
   themeSelect: document.getElementById("themeSelect"),
-  difficultySelect: document.getElementById("difficultySelect")
+  difficultySelect: document.getElementById("difficultySelect"),
+  muteToggle: document.getElementById("muteToggle"),
+
+  // SFX elements
+  sfxCollect: document.getElementById("sfxCollect"), // water-splash-85698.mp3
+  sfxDirty:   document.getElementById("sfxDirty"),
+  sfxWin:     document.getElementById("sfxWin"),
+  sfxClick:   document.getElementById("sfxClick"),
+  sfxGameOver:document.getElementById("sfxGameOver"), // game-over-deep-male-voice-clip-352695.mp3
+
+  countdown: document.getElementById("countdown")
 };
 
 // ===== Init =====
@@ -69,19 +83,20 @@ function createGrid(){
 // ===== Game flow =====
 function startGame(){
   if(running) return;
-  resetState();
-  running = true;
+  resetState();                 // ensure clean slate
   els.start.disabled = true;
   setBanner("");
-  setMsg("Round started. Tap clean, avoid dirty.");
-
-  tickId = setInterval(()=>{
-    timeLeft--;
-    updateHUD();
-    if(timeLeft<=0) endGame();
-  }, 1000);
-
-  spawnId = setInterval(spawnToken, spawnMs);
+  setMsg("Round starting…");
+  preCountdown(()=>{
+    running = true;
+    setMsg("Tap clean, avoid dirty.");
+    tickId = setInterval(()=>{
+      timeLeft--;
+      updateHUD();
+      if(timeLeft<=0) endGame();
+    }, 1000);
+    spawnId = setInterval(spawnToken, spawnMs);
+  });
 }
 
 function endGame(){
@@ -101,20 +116,34 @@ function endGame(){
     setBanner("New best score!");
   }
 
-  if(win) fireConfetti(1400);
+  // Universal game-over VO + optional win fanfare
+  play(els.sfxGameOver);
+  if(win){ fireConfetti(1400); play(els.sfxWin); }
 }
 
 function resetGame(){
+  // hard reset so Start can be pressed immediately again
   resetState();
+  els.start.disabled = false;         // <-- re-enable Start
   setBanner("");
   setMsg("Reset. Press Start to play.");
 }
 
 function resetState(){
+  running = false;                     // <-- critical fix
   score=0; timeLeft=ROUND_TIME; lives=START_LIVES; streak=0;
+  firedMilestones.clear();
   updateHUD();
-  clearInterval(tickId); clearInterval(spawnId);
+
+  clearInterval(tickId); tickId=null;
+  clearInterval(spawnId); spawnId=null;
+
+  // clear tokens and any leftover countdown overlay
   wipeTokens();
+  if (els.countdown){
+    els.countdown.classList.remove("show");
+    els.countdown.textContent = "";
+  }
 }
 
 function wipeTokens(){
@@ -139,7 +168,12 @@ function spawnToken(){
   const token = cell.querySelector(".water-can");
   let clicked = false;
 
-  token.addEventListener("click", e=>{
+  // Accessibility semantics
+  token.setAttribute("role", "button");
+  token.setAttribute("tabindex", "0");
+  token.setAttribute("aria-label", isPollutant ? "dirty can, avoid" : "clean jerry can, collect");
+
+  const onClick = (e)=>{
     if(!running) return;
     clicked = true;
     ripple(e, cell);
@@ -147,30 +181,57 @@ function spawnToken(){
     if(token.classList.contains("clean")){
       score += 1; streak += 1;
       setMsg("+1 clean can");
+      play(els.sfxCollect);          // water splash on collect
       milestoneCheck();
-      pulse(token);
+      vanishAndRemove(token, cell);  // remove from DOM after click
     }else{
       score = Math.max(0, score - 3);
       lives = Math.max(0, lives - 1);
       streak = 0;
       setMsg("dirty can: -3 • life -1");
-      token.classList.add("shake");
-      setTimeout(()=> token && token.classList.remove("shake"), 220);
+      play(els.sfxDirty);
+      explodeAndRemove(token, cell);
       if(lives === 0){ updateHUD(); endGame(); return; }
     }
     updateHUD();
-  }, { once:true });
+  };
 
-  // miss penalty
+  token.addEventListener("click", onClick, { once:true });
+
+  // Keyboard support mirrors click
+  token.addEventListener("keydown", (e)=>{
+    if (!running) return;
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      token.click();
+    }
+  }, { once: true });
+
+  // Miss penalty for clean tokens
   setTimeout(()=>{
     if(!clicked && running && token && token.classList.contains("clean")){
       score = Math.max(0, score - MISS_PENALTY);
       streak = 0;
       setMsg(`missed clean: -${MISS_PENALTY}`);
+      play(els.sfxDirty);
+      cell.classList.add("flash");
+      setTimeout(()=> cell.classList.remove("flash"), 250);
       updateHUD();
     }
-    cell.innerHTML = "";
+    if (cell) cell.innerHTML = "";
   }, spawnMs);
+}
+
+// ===== DOM removal helpers =====
+function vanishAndRemove(token, cell){
+  if(!token) return;
+  token.classList.add("vanish");
+  token.addEventListener("animationend", ()=>{ if(cell) cell.innerHTML = ""; }, { once:true });
+}
+function explodeAndRemove(token, cell){
+  if(!token) return;
+  token.classList.add("explode");
+  token.addEventListener("animationend", ()=>{ if(cell) cell.innerHTML = ""; }, { once:true });
 }
 
 // ===== HUD + feedback =====
@@ -185,15 +246,15 @@ function setMsg(t){ els.msg.textContent = t; }
 function setBanner(t){ els.banner.textContent = t; }
 
 function milestoneCheck(){
-  if(score === 5)  setBanner("Milestone 5: you’re warmed up.");
-  if(score === 10) setBanner("Milestone 10: keep the flow going.");
-  if(score === 15) setBanner("Milestone 15: almost there.");
-  if(score === GOAL) setBanner("Goal reached! Campus perk preview unlocked.");
-}
-
-function pulse(el){
-  el.style.transform = "scale(1.12)";
-  setTimeout(()=> el && (el.style.transform = "scale(1)"), 120);
+  for(const m of MILESTONES){
+    if(score >= m.score && !firedMilestones.has(m.score)){
+      firedMilestones.add(m.score);
+      const choice = m.msgs[Math.floor(Math.random()*m.msgs.length)];
+      setBanner(choice);
+      els.banner.style.transform = "scale(1.02)";
+      setTimeout(()=> els.banner && (els.banner.style.transform="scale(1)"), 130);
+    }
+  }
 }
 
 function ripple(e, cell){
@@ -222,26 +283,55 @@ function fireConfetti(duration=1200){
   })(t0);
 }
 
+// ===== Countdown =====
+function preCountdown(cb){
+  const cd = els.countdown;
+  const steps = ["3","2","1","Go!"];
+  let i = 0;
+  cd.classList.add("show");
+  cd.textContent = steps[i];
+
+  const id = setInterval(()=>{
+    i++;
+    if (i < steps.length){
+      cd.textContent = steps[i];
+    } else {
+      clearInterval(id);
+      cd.classList.remove("show");
+      cd.textContent = "";
+      cb();
+    }
+  }, 700);
+}
+
+// ===== SFX helpers =====
+function play(sfx){
+  if (!sfx) return;
+  if (els.muteToggle && els.muteToggle.checked) return;
+  try { sfx.currentTime = 0; sfx.play(); } catch {}
+}
+
 // ===== UX wiring =====
 function wireUX(){
-  els.start.addEventListener("click", startGame);
-  els.reset.addEventListener("click", resetGame);
+  els.start.addEventListener("click", ()=>{ play(els.sfxClick); startGame(); });
+  els.reset.addEventListener("click", ()=>{ play(els.sfxClick); resetGame(); });
 
-  // Theme switch -> swap body class
   els.themeSelect.addEventListener("change", (e)=>{
     const cls = e.target.value;
     document.body.classList.remove("theme-sky","theme-desert","theme-ocean","theme-neon");
     document.body.classList.add(cls);
   });
 
-  // Difficulty switch (changes spawn rate next round)
   els.difficultySelect.addEventListener("change", (e)=>{
     spawnMs = DIFFICULTY[e.target.value] || DIFFICULTY.normal;
     setMsg(`Difficulty set to ${e.target.value}.`);
   });
 
-  // Reduced motion
   els.reducedMotion.addEventListener("change", e=>{
     document.documentElement.classList.toggle("rm", e.target.checked);
+  });
+
+  els.muteToggle.addEventListener("change", ()=>{
+    setMsg(els.muteToggle.checked ? "Sound off." : "Sound on.");
   });
 }

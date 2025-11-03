@@ -6,7 +6,6 @@
   --panel:#ffffff;
   --edge:#e6e8eb;
 
-  /* default tokens (overridden per theme) */
   --bg-a:#ecf3ff;
   --bg-b:#f8fbff;
   --tile-a:#eef7ff;
@@ -18,18 +17,13 @@
 
 /* ===== World background layer ===== */
 .world-bg{
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  opacity: .45;
-  filter: saturate(1.05);
+  position: fixed; inset: 0; z-index: -1;
+  background-size: cover; background-position: center; background-repeat: no-repeat;
+  opacity: .45; filter: saturate(1.05);
 }
 body.theme-neon .world-bg{ opacity:.35 }
 
-/* ===== THEMES with background art ===== */
+/* ===== THEMES (unchanged) ===== */
 body.theme-sky{
   --bg-a:#ecf3ff; --bg-b:#f8fbff;
   --tile-a:#eef7ff; --tile-b:#e2f1ff;
@@ -52,7 +46,6 @@ body.theme-sky .world-bg{
 <ellipse cx='500' cy='310' rx='130' ry='56'/>\
 </g></svg>");
 }
-
 body.theme-desert{
   --bg-a:#fff4d6; --bg-b:#fffaf0;
   --tile-a:#ffe9b3; --tile-b:#ffe2a3;
@@ -68,7 +61,6 @@ body.theme-desert .world-bg{
 <path d='M0 720 C260 630, 520 760, 820 720 C1120 680, 1360 800, 1600 760 L1600 900 L0 900 Z' fill='%23f4c26a' opacity='0.9'/>\
 </svg>");
 }
-
 body.theme-ocean{
   --bg-a:#d7f9ff; --bg-b:#f1fdff;
   --tile-a:#c8f0f9; --tile-b:#b8e8f2;
@@ -84,7 +76,6 @@ body.theme-ocean .world-bg{
 <path d='M0 700 Q180 670 360 700 T720 700 T1080 700 T1440 700 T1600 700 L1600 900 L0 900 Z' fill='%2306b6d4' opacity='.35'/>\
 </svg>");
 }
-
 body.theme-neon{
   --bg-a:#0b1020; --bg-b:#0f1429;
   --tile-a:#121a35; --tile-b:#0f1830;
@@ -101,7 +92,7 @@ body.theme-neon .world-bg{
 </g></svg>");
 }
 
-/* ===== Base layout and components ===== */
+/* ===== Base ===== */
 *{box-sizing:border-box}
 html,body{height:100%}
 body{
@@ -123,7 +114,8 @@ body{
   border-bottom:1px solid var(--edge);
 }
 .lockup{display:flex; align-items:center; gap:10px}
-.logo{width:28px; height:auto}
+/* your bitmap logo */
+.logo-img{width:28px; height:28px; object-fit:contain; display:block}
 .brand{font-weight:800}
 .brand.game{font-weight:800; letter-spacing:.2px}
 .divider{opacity:.35}
@@ -132,7 +124,7 @@ body{
 .toggle input{accent-color:#111}
 .link{color:var(--accent); text-decoration:none; font-weight:700}
 
-/* Layout shell */
+/* Layout */
 .shell{max-width:980px; margin:24px auto; padding:0 16px}
 .subtitle{margin:6px 0 14px; text-align:center; color:var(--muted)}
 
@@ -142,9 +134,7 @@ body{
 select{border:1px solid var(--edge); border-radius:8px; padding:6px 8px; background:var(--panel); color:var(--ink)}
 
 /* HUD chips */
-.chips{
-  display:grid; grid-template-columns:repeat(6,1fr); gap:12px; margin:0 0 10px;
-}
+.chips{display:grid; grid-template-columns:repeat(6,1fr); gap:12px; margin:0 0 10px}
 .chip{
   background:var(--panel); border:1px solid var(--edge); border-radius:12px; padding:10px 12px;
   box-shadow:0 8px 24px rgba(16,24,40,.06);
@@ -180,6 +170,8 @@ select{border:1px solid var(--edge); border-radius:8px; padding:6px 8px; backgro
   transition:transform .12s ease, box-shadow .12s ease;
 }
 .grid-cell:hover{transform:translateY(-1px); box-shadow:0 10px 20px color-mix(in srgb, var(--accent) 15%, #000 0%)}
+.grid-cell.flash{animation:cellflash .25s ease}
+@keyframes cellflash{from{box-shadow:0 0 0 0 rgba(255,0,0,.4)} to{box-shadow:0 0 0 8px rgba(255,0,0,0)}}
 
 /* Tokens */
 .water-can-wrapper{position:absolute; inset:0; display:grid; place-items:center}
@@ -190,25 +182,43 @@ select{border:1px solid var(--edge); border-radius:8px; padding:6px 8px; backgro
 }
 @keyframes pop{from{transform:scale(.7); opacity:.8} to{transform:scale(1); opacity:1}}
 
-.water-can.clean{background:var(--cw-yellow); border:2px solid rgba(0,0,0,.08)}
-.water-can.clean::before{
-  content:""; position:absolute; right:8px; top:-8px; width:18px; height:10px; border-radius:2px 2px 0 0;
-  background:var(--cw-yellow); border:2px solid rgba(0,0,0,.08)
+/* Clean token uses your image */
+.water-can.clean{
+  background: transparent url("img/water-can-transparent.png") center/contain no-repeat;
+  border:0;
 }
+.water-can.clean::before{ content:none }
+
 .water-can.pollutant{background:var(--danger); border-radius:50%}
 .water-can.pollutant::after{
   content:"✖"; position:absolute; inset:0; color:#fff; display:grid; place-items:center; font-weight:800; font-size:36px;
   transform:translateY(-1px);
 }
 
-/* Click effects */
+/* Interaction effects */
 .ripple{
   position:absolute; width:10px; height:10px; border-radius:50%; background:rgba(255,255,255,.85);
   transform:translate(-50%,-50%) scale(1); animation:ripple .5s ease-out forwards; pointer-events:none;
 }
 @keyframes ripple{to{opacity:0; transform:translate(-50%,-50%) scale(14)}}
+
 .shake{animation:shake .18s linear 1}
-@keyframes shake{0%{transform:translateX(-4px)}25%{transform:translateX(4px)}50%{transform:translateX(-4px)}75%{transform:translateX(4px)}100%{transform:translateX(0)}}
+@keyframes shake{
+  0%{transform:translateX(-4px)}
+  25%{transform:translateX(4px)}
+  50%{transform:translateX(-4px)}
+  75%{transform:translateX(4px)}
+  100%{transform:translateX(0)}
+}
+
+/* Vanish/explode for DOM removal */
+.vanish{animation:vanish .18s ease-out forwards}
+@keyframes vanish{to{transform:scale(.5); opacity:0}}
+.explode{animation:explode .18s ease-out forwards}
+@keyframes explode{to{transform:scale(1.4); opacity:0}}
+
+/* Keyboard focus */
+.water-can:focus{outline:3px solid color-mix(in oklab, var(--accent) 70%, white); outline-offset:3px}
 
 /* Controls */
 .controls{display:flex; gap:10px; justify-content:center; margin:16px 0 8px}
@@ -219,16 +229,22 @@ select{border:1px solid var(--edge); border-radius:8px; padding:6px 8px; backgro
 .btn.ghost{background:var(--panel); color:#111; border-color:var(--edge)}
 .btn:disabled{opacity:.6; cursor:not-allowed}
 
-/* Confetti */
+/* Confetti + countdown */
 .confetti-layer{position:fixed; inset:0; pointer-events:none}
+.countdown{
+  position: fixed; inset: 0; display: grid; place-items: center; 
+  font-size: clamp(48px, 8vw, 120px); font-weight: 900; 
+  color: var(--ink); background: color-mix(in oklab, var(--panel) 70%, transparent);
+  backdrop-filter: blur(2px) saturate(1.05);
+  z-index: 20; opacity: 0; pointer-events: none; transition: opacity .2s ease;
+}
+.countdown.show{ opacity: 1; pointer-events: auto; }
 
 /* Footer */
 .footnote{text-align:center; color:var(--muted); padding:10px 0 18px}
 
 /* Responsive */
-@media (max-width: 980px){
-  .chips{grid-template-columns:repeat(3,1fr)}
-}
+@media (max-width: 980px){ .chips{grid-template-columns:repeat(3,1fr)} }
 @media (max-width: 560px){
   .chips{grid-template-columns:repeat(2,1fr)}
   .options{gap:8px}
@@ -239,3 +255,4 @@ select{border:1px solid var(--edge); border-radius:8px; padding:6px 8px; backgro
 html.rm .grid-cell:hover{transform:none; box-shadow:none}
 html.rm .water-can{animation:none}
 html.rm .ripple{display:none}
+html.rm .vanish, html.rm .explode{animation:none; opacity:1}

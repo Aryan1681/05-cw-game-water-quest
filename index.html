@@ -7,16 +7,11 @@
   <link href="style.css" rel="stylesheet" />
 </head>
 <body class="theme-sky">
-  <!-- Background art layer (switches with theme) -->
   <div class="world-bg" aria-hidden="true"></div>
 
   <header class="brandbar">
     <div class="lockup">
-      <!-- Inline “jerry can” so the logo never breaks -->
-      <svg class="logo" viewBox="0 0 64 72" aria-hidden="true">
-        <rect x="10" y="12" rx="6" ry="6" width="44" height="50" fill="#FFC907" stroke="rgba(0,0,0,.12)" stroke-width="3"/>
-        <rect x="36" y="6"  rx="3" ry="3" width="16" height="10" fill="#FFC907" stroke="rgba(0,0,0,.12)" stroke-width="3"/>
-      </svg>
+      <img class="logo-img" src="img/water-can-transparent.png" alt="charity: water jerry can logo" />
       <span class="brand">charity: water</span>
       <span class="divider">•</span>
       <span class="brand game">Water Quest</span>
@@ -27,6 +22,19 @@
         <input id="reducedMotion" type="checkbox" />
         <span>Reduced motion</span>
       </label>
+
+      <label class="toggle">
+        <input id="muteToggle" type="checkbox" />
+        <span>Mute</span>
+      </label>
+
+      <!-- SFX: use your exact files/paths -->
+      <audio id="sfxCollect" preload="auto" src="sound_effects/water-splash-85698.mp3"></audio>
+      <audio id="sfxDirty"   preload="auto" src="assets/sfx/dirty.mp3"></audio>
+      <audio id="sfxWin"     preload="auto" src="assets/sfx/win.mp3"></audio>
+      <audio id="sfxClick"   preload="auto" src="assets/sfx/click.mp3"></audio>
+      <audio id="sfxGameOver" preload="auto" src="sound_effects/game-over-deep-male-voice-clip-352695.mp3"></audio>
+
       <a class="link" href="https://www.charitywater.org/" target="_blank" rel="noopener">Learn</a>
     </nav>
   </header>
@@ -81,6 +89,7 @@
     </div>
 
     <canvas id="confetti" class="confetti-layer" aria-hidden="true"></canvas>
+    <div id="countdown" class="countdown" aria-hidden="true"></div>
   </main>
 
   <footer class="footnote">
